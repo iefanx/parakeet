@@ -1895,7 +1895,7 @@ private fun StyleIconPreview(style: Int, selected: Boolean, modifier: Modifier =
                     val size = this.size.minDimension
                     val cx = this.size.width / 2f
                     val cy = this.size.height / 2f
-                    val scale = (size * 0.60f) / 24f
+                    val scale = (size * 0.85f) / 24f
                     fun mx(x: Float) = cx + (x - 12f) * scale
                     fun my(y: Float) = cy + (y - 12f) * scale
                     
@@ -1968,7 +1968,7 @@ private fun StyleIconPreview(style: Int, selected: Boolean, modifier: Modifier =
                 
                 when (style) {
                     OverlayAppearanceStore.STYLE_MIC -> {
-                        val scale = (size * 0.60f) / 24f
+                        val scale = (size * 0.85f) / 24f
                         fun mx(x: Float) = cx + (x - 12f) * scale
                         fun my(y: Float) = cy + (y - 12f) * scale
                         
