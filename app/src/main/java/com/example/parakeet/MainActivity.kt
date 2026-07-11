@@ -2194,11 +2194,11 @@ private fun AppearanceTab(
                                         onAppearanceChange(appearance.copy(style = style))
                                     }
                                 }
-                                .padding(vertical = 12.dp),
+                                .padding(vertical = 8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             StyleIconPreview(style, selected)
-                            Spacer(Modifier.height(6.dp))
+                            Spacer(Modifier.height(3.dp))
                             Text(
                                 text = if (style == OverlayAppearanceStore.STYLE_CUSTOM_IMAGE) "Custom" else OverlayAppearanceStore.styleLabel(style),
                                 fontSize = 11.sp,
