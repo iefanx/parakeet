@@ -1895,25 +1895,52 @@ private fun StyleIconPreview(style: Int, selected: Boolean, modifier: Modifier =
                     val size = this.size.minDimension
                     val cx = this.size.width / 2f
                     val cy = this.size.height / 2f
+                    
+                    val w = size * 0.44f
+                    val h = size * 0.36f
+                    val left = cx - w / 2f
+                    val top = cy - h / 2f
+                    
+                    val stroke = size * 0.07f
+                    
+                    // Frame
                     drawRoundRect(
-                        baseColor,
-                        topLeft = androidx.compose.ui.geometry.Offset(cx - size * 0.25f, cy - size * 0.20f),
-                        size = androidx.compose.ui.geometry.Size(size * 0.50f, size * 0.40f),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(size * 0.06f, size * 0.06f),
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(size * 0.08f)
+                        color = baseColor,
+                        topLeft = androidx.compose.ui.geometry.Offset(left, top),
+                        size = androidx.compose.ui.geometry.Size(w, h),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(size * 0.05f, size * 0.05f),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke)
                     )
-                    drawCircle(baseColor, size * 0.06f, androidx.compose.ui.geometry.Offset(cx - size * 0.10f, cy - size * 0.05f))
+                    
+                    // Sun
+                    drawCircle(
+                        color = baseColor,
+                        radius = size * 0.04f,
+                        center = androidx.compose.ui.geometry.Offset(cx - size * 0.08f, cy - size * 0.06f)
+                    )
+                    
+                    // Mountain 1
                     val path = androidx.compose.ui.graphics.Path().apply {
-                        moveTo(cx - size * 0.20f, cy + size * 0.18f)
-                        lineTo(cx - size * 0.05f, cy - size * 0.05f)
-                        lineTo(cx + size * 0.10f, cy + size * 0.10f)
-                        lineTo(cx + size * 0.15f, cy + size * 0.02f)
-                        lineTo(cx + size * 0.22f, cy + size * 0.18f)
+                        moveTo(left + size * 0.04f, cy + h / 2f - size * 0.02f)
+                        lineTo(left + size * 0.16f, cy - size * 0.04f)
+                        lineTo(left + size * 0.28f, cy + h / 2f - size * 0.02f)
                     }
                     drawPath(
                         path,
                         baseColor,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(size * 0.08f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
+                    )
+                    
+                    // Mountain 2
+                    val path2 = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(left + size * 0.20f, cy + h / 2f - size * 0.02f)
+                        lineTo(left + size * 0.32f, cy - size * 0.01f)
+                        lineTo(left + size * 0.40f, cy + h / 2f - size * 0.02f)
+                    }
+                    drawPath(
+                        path2,
+                        baseColor,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
                     )
                 }
             }
@@ -1950,26 +1977,23 @@ private fun StyleIconPreview(style: Int, selected: Boolean, modifier: Modifier =
                         )
                     }
                     OverlayAppearanceStore.STYLE_WAVE -> {
-                        val path = androidx.compose.ui.graphics.Path()
-                        val points = 30
-                        val width = size * 0.7f
-                        val startX = cx - width / 2f
-                        val amplitude = size * 0.2f
-                        for (i in 0..points) {
-                            val x = startX + (width / points) * i
-                            val angle = (i.toFloat() / points) * 2f * Math.PI.toFloat() * 1.5f
-                            val y = cy + Math.sin(angle.toDouble()).toFloat() * amplitude
-                            if (i == 0) {
-                                path.moveTo(x, y)
-                            } else {
-                                path.lineTo(x, y)
-                            }
-                        }
-                        drawPath(
-                            path,
-                            baseColor,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(size * 0.08f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                        )
+                        val gap = size * 0.10f
+                        val h1 = size * 0.16f
+                        val h2 = size * 0.32f
+                        val h3 = size * 0.44f
+                        
+                        val stroke = size * 0.07f
+                        
+                        // Left outer
+                        drawLine(baseColor, androidx.compose.ui.geometry.Offset(cx - gap * 2f, cy - h1 / 2f), androidx.compose.ui.geometry.Offset(cx - gap * 2f, cy + h1 / 2f), stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                        // Left inner
+                        drawLine(baseColor, androidx.compose.ui.geometry.Offset(cx - gap, cy - h2 / 2f), androidx.compose.ui.geometry.Offset(cx - gap, cy + h2 / 2f), stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                        // Center
+                        drawLine(baseColor, androidx.compose.ui.geometry.Offset(cx, cy - h3 / 2f), androidx.compose.ui.geometry.Offset(cx, cy + h3 / 2f), stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                        // Right inner
+                        drawLine(baseColor, androidx.compose.ui.geometry.Offset(cx + gap, cy - h2 / 2f), androidx.compose.ui.geometry.Offset(cx + gap, cy + h2 / 2f), stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                        // Right outer
+                        drawLine(baseColor, androidx.compose.ui.geometry.Offset(cx + gap * 2f, cy - h1 / 2f), androidx.compose.ui.geometry.Offset(cx + gap * 2f, cy + h1 / 2f), stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                     }
                 }
             }
@@ -2328,15 +2352,24 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawOverlayIcon(
             )
         }
         else -> {
-            val scale = size * 0.70f / 24f
-            fun mx(x: Float) = cx + (x - 12f) * scale
-            fun my(y: Float) = cy + (y - 12f) * scale
+            val gap = size * 0.10f
+            val h1 = size * 0.16f
+            val h2 = size * 0.32f
+            val h3 = size * 0.44f
+            
+            val stroke = size * 0.055f
             val cap = androidx.compose.ui.graphics.StrokeCap.Round
-            drawLine(iconColor, androidx.compose.ui.geometry.Offset(mx(6f), my(11f)), androidx.compose.ui.geometry.Offset(mx(6f), my(13f)), size * 0.046f, cap)
-            drawLine(iconColor, androidx.compose.ui.geometry.Offset(mx(9f), my(9f)), androidx.compose.ui.geometry.Offset(mx(9f), my(15f)), size * 0.046f, cap)
-            drawLine(iconColor, androidx.compose.ui.geometry.Offset(mx(12f), my(6f)), androidx.compose.ui.geometry.Offset(mx(12f), my(18f)), size * 0.046f, cap)
-            drawLine(iconColor, androidx.compose.ui.geometry.Offset(mx(15f), my(9f)), androidx.compose.ui.geometry.Offset(mx(15f), my(15f)), size * 0.046f, cap)
-            drawLine(iconColor, androidx.compose.ui.geometry.Offset(mx(18f), my(11f)), androidx.compose.ui.geometry.Offset(mx(18f), my(13f)), size * 0.046f, cap)
+            
+            // Left outer
+            drawLine(iconColor, androidx.compose.ui.geometry.Offset(cx - gap * 2f, cy - h1 / 2f), androidx.compose.ui.geometry.Offset(cx - gap * 2f, cy + h1 / 2f), stroke, cap)
+            // Left inner
+            drawLine(iconColor, androidx.compose.ui.geometry.Offset(cx - gap, cy - h2 / 2f), androidx.compose.ui.geometry.Offset(cx - gap, cy + h2 / 2f), stroke, cap)
+            // Center
+            drawLine(iconColor, androidx.compose.ui.geometry.Offset(cx, cy - h3 / 2f), androidx.compose.ui.geometry.Offset(cx, cy + h3 / 2f), stroke, cap)
+            // Right inner
+            drawLine(iconColor, androidx.compose.ui.geometry.Offset(cx + gap, cy - h2 / 2f), androidx.compose.ui.geometry.Offset(cx + gap, cy + h2 / 2f), stroke, cap)
+            // Right outer
+            drawLine(iconColor, androidx.compose.ui.geometry.Offset(cx + gap * 2f, cy - h1 / 2f), androidx.compose.ui.geometry.Offset(cx + gap * 2f, cy + h1 / 2f), stroke, cap)
         }
     }
 }

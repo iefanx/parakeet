@@ -194,17 +194,20 @@ class MicDrawable(
     }
 
     private fun drawWaveIcon(canvas: Canvas, cx: Float, cy: Float, size: Float) {
-        val logoSize = size * 0.70f
-        val scale = logoSize / 24f
-        fun mapX(x: Float): Float = cx + (x - 12f) * scale
-        fun mapY(y: Float): Float = cy + (y - 12f) * scale
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = size * 0.055f
+        paint.strokeCap = Paint.Cap.ROUND
+        
+        val gap = size * 0.10f
+        val h1 = size * 0.16f
+        val h2 = size * 0.32f
+        val h3 = size * 0.44f
 
-        canvas.drawLine(mapX(6f), mapY(11f), mapX(6f), mapY(13f), paint)
-        canvas.drawLine(mapX(9f), mapY(9f), mapX(9f), mapY(15f), paint)
-        canvas.drawLine(mapX(12f), mapY(6f), mapX(12f), mapY(18f), paint)
-        canvas.drawLine(mapX(15f), mapY(9f), mapX(15f), mapY(15f), paint)
-        canvas.drawLine(mapX(18f), mapY(11f), mapX(18f), mapY(13f), paint)
-        canvas.drawCircle(cx, cy, 9f * scale, paint)
+        canvas.drawLine(cx - gap * 2f, cy - h1 / 2f, cx - gap * 2f, cy + h1 / 2f, paint)
+        canvas.drawLine(cx - gap, cy - h2 / 2f, cx - gap, cy + h2 / 2f, paint)
+        canvas.drawLine(cx, cy - h3 / 2f, cx, cy + h3 / 2f, paint)
+        canvas.drawLine(cx + gap, cy - h2 / 2f, cx + gap, cy + h2 / 2f, paint)
+        canvas.drawLine(cx + gap * 2f, cy - h1 / 2f, cx + gap * 2f, cy + h1 / 2f, paint)
     }
 
     private fun drawMicIcon(canvas: Canvas, cx: Float, cy: Float, size: Float) {
@@ -233,25 +236,36 @@ class MicDrawable(
 
     private fun drawGalleryIcon(canvas: Canvas, cx: Float, cy: Float, size: Float) {
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = size * 0.046f
+        paint.strokeWidth = size * 0.05f
         paint.strokeCap = Paint.Cap.ROUND
         paint.strokeJoin = Paint.Join.ROUND
 
-        val frame = RectF(cx - size * 0.18f, cy - size * 0.14f, cx + size * 0.18f, cy + size * 0.14f)
+        val w = size * 0.44f
+        val h = size * 0.36f
+        val left = cx - w / 2f
+        val top = cy - h / 2f
+        val frame = RectF(left, top, cx + w / 2f, cy + h / 2f)
         canvas.drawRoundRect(frame, size * 0.04f, size * 0.04f, paint)
 
+        // Sun
         paint.style = Paint.Style.FILL
-        canvas.drawCircle(cx - size * 0.07f, cy - size * 0.04f, size * 0.035f, paint)
+        canvas.drawCircle(cx - size * 0.08f, cy - size * 0.06f, size * 0.035f, paint)
 
+        // Closed geometric mountains
         paint.style = Paint.Style.STROKE
         val path = android.graphics.Path().apply {
-            moveTo(cx - size * 0.13f, cy + size * 0.12f)
-            lineTo(cx - size * 0.03f, cy - size * 0.02f)
-            lineTo(cx + size * 0.05f, cy + size * 0.06f)
-            lineTo(cx + size * 0.09f, cy + size * 0.01f)
-            lineTo(cx + size * 0.14f, cy + size * 0.12f)
+            moveTo(left + size * 0.04f, cy + h / 2f - size * 0.02f)
+            lineTo(left + size * 0.16f, cy - size * 0.04f)
+            lineTo(left + size * 0.28f, cy + h / 2f - size * 0.02f)
         }
         canvas.drawPath(path, paint)
+
+        val path2 = android.graphics.Path().apply {
+            moveTo(left + size * 0.20f, cy + h / 2f - size * 0.02f)
+            lineTo(left + size * 0.32f, cy - size * 0.01f)
+            lineTo(left + size * 0.40f, cy + h / 2f - size * 0.02f)
+        }
+        canvas.drawPath(path2, paint)
     }
 
     private fun colorWithRawAlpha(color: Int, alpha: Int): Int {
