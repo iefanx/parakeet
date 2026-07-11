@@ -1895,52 +1895,67 @@ private fun StyleIconPreview(style: Int, selected: Boolean, modifier: Modifier =
                     val size = this.size.minDimension
                     val cx = this.size.width / 2f
                     val cy = this.size.height / 2f
+                    val scale = (size * 0.60f) / 24f
+                    fun mx(x: Float) = cx + (x - 12f) * scale
+                    fun my(y: Float) = cy + (y - 12f) * scale
                     
-                    val w = size * 0.44f
-                    val h = size * 0.36f
-                    val left = cx - w / 2f
-                    val top = cy - h / 2f
+                    val stroke = size * 0.046f
+                    val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                    val join = androidx.compose.ui.graphics.StrokeJoin.Round
                     
-                    val stroke = size * 0.07f
-                    
-                    // Frame
-                    drawRoundRect(
-                        color = baseColor,
-                        topLeft = androidx.compose.ui.geometry.Offset(left, top),
-                        size = androidx.compose.ui.geometry.Size(w, h),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(size * 0.05f, size * 0.05f),
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke)
-                    )
-                    
-                    // Sun
-                    drawCircle(
-                        color = baseColor,
-                        radius = size * 0.04f,
-                        center = androidx.compose.ui.geometry.Offset(cx - size * 0.08f, cy - size * 0.06f)
-                    )
-                    
-                    // Mountain 1
                     val path = androidx.compose.ui.graphics.Path().apply {
-                        moveTo(left + size * 0.04f, cy + h / 2f - size * 0.02f)
-                        lineTo(left + size * 0.16f, cy - size * 0.04f)
-                        lineTo(left + size * 0.28f, cy + h / 2f - size * 0.02f)
+                        moveTo(mx(14.2639f), my(15.9375f))
+                        lineTo(mx(12.5958f), my(14.2834f))
+                        cubicTo(mx(11.7909f), my(13.4851f), mx(11.3884f), my(13.086f), mx(10.9266f), my(12.9401f))
+                        cubicTo(mx(10.5204f), my(12.8118f), mx(10.0838f), my(12.8165f), mx(9.68048f), my(12.9536f))
+                        cubicTo(mx(9.22188f), my(13.1095f), mx(8.82814f), my(13.5172f), mx(8.04068f), my(14.3326f))
+                        lineTo(mx(4.04409f), my(18.2801f))
+
+                        moveTo(mx(14.2639f), my(15.9375f))
+                        lineTo(mx(14.6053f), my(15.599f))
+                        cubicTo(mx(15.4112f), my(14.7998f), mx(15.8141f), my(14.4002f), mx(16.2765f), my(14.2543f))
+                        cubicTo(mx(16.6831f), my(14.126f), mx(17.12f), my(14.1311f), mx(17.5236f), my(14.2687f))
+                        cubicTo(mx(17.9824f), my(14.4251f), mx(18.3761f), my(14.8339f), mx(19.1634f), my(15.6514f))
+                        lineTo(mx(20.0f), my(16.4934f))
+
+                        moveTo(mx(14.2639f), my(15.9375f))
+                        lineTo(mx(18.275f), my(19.9565f))
+
+                        moveTo(mx(18.275f), my(19.9565f))
+                        cubicTo(mx(17.9176f), my(20f), mx(17.4543f), my(20f), mx(16.8f), my(20f))
+                        lineTo(mx(7.2f), my(20f))
+                        cubicTo(mx(6.07989f), my(20f), mx(5.51984f), my(20f), mx(5.09202f), my(19.782f))
+                        cubicTo(mx(4.71569f), my(19.5903f), mx(4.40973f), my(19.2843f), mx(4.21799f), my(18.908f))
+                        cubicTo(mx(4.12796f), my(18.7313f), mx(4.07512f), my(18.5321f), mx(4.04409f), my(18.2801f))
+
+                        moveTo(mx(18.275f), my(19.9565f))
+                        cubicTo(mx(18.5293f), my(19.9256f), mx(18.7301f), my(19.8727f), mx(18.908f), my(19.782f))
+                        cubicTo(mx(19.2843f), my(19.5903f), mx(19.5903f), my(19.2843f), mx(19.782f), my(18.908f))
+                        cubicTo(mx(20f), my(18.4802f), mx(20f), my(17.9201f), mx(20f), my(16.8f))
+                        lineTo(mx(20f), my(16.4934f))
+
+                        moveTo(mx(4.04409f), my(18.2801f))
+                        cubicTo(mx(4f), my(17.9221f), mx(4f), my(17.4575f), mx(4f), my(16.8f))
+                        lineTo(mx(4f), my(7.2f))
+                        cubicTo(mx(4f), my(6.0799f), mx(4f), my(5.51984f), mx(4.21799f), my(5.09202f))
+                        cubicTo(mx(4.40973f), my(4.71569f), mx(4.71569f), my(4.40973f), mx(5.09202f), my(4.21799f))
+                        cubicTo(mx(5.51984f), my(4f), mx(6.07989f), my(4f), mx(7.2f), my(4f))
+                        lineTo(mx(16.8f), my(4f))
+                        cubicTo(mx(17.9201f), my(4f), mx(18.4802f), my(4f), mx(18.908f), my(4.21799f))
+                        cubicTo(mx(19.2843f), my(4.40973f), mx(19.5903f), my(4.71569f), mx(19.782f), my(5.09202f))
+                        cubicTo(mx(20f), my(5.51984f), mx(20f), my(6.0799f), mx(20f), my(7.2f))
+                        lineTo(mx(20f), my(16.4934f))
+
+                        moveTo(mx(17f), my(8.99989f))
+                        cubicTo(mx(17f), my(10.1045f), mx(16.1046f), my(10.9999f), mx(15f), my(10.9999f))
+                        cubicTo(mx(13.8954f), my(10.9999f), mx(13f), my(10.1045f), mx(13f), my(8.99989f))
+                        cubicTo(mx(13f), my(7.89532f), mx(13.8954f), my(6.99989f), mx(15f), my(6.99989f))
+                        cubicTo(mx(16.1046f), my(6.99989f), mx(17f), my(7.89532f), mx(17f), my(8.99989f))
                     }
                     drawPath(
                         path,
                         baseColor,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
-                    )
-                    
-                    // Mountain 2
-                    val path2 = androidx.compose.ui.graphics.Path().apply {
-                        moveTo(left + size * 0.20f, cy + h / 2f - size * 0.02f)
-                        lineTo(left + size * 0.32f, cy - size * 0.01f)
-                        lineTo(left + size * 0.40f, cy + h / 2f - size * 0.02f)
-                    }
-                    drawPath(
-                        path2,
-                        baseColor,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = cap, join = join)
                     )
                 }
             }
@@ -1953,18 +1968,50 @@ private fun StyleIconPreview(style: Int, selected: Boolean, modifier: Modifier =
                 
                 when (style) {
                     OverlayAppearanceStore.STYLE_MIC -> {
-                        drawRoundRect(
+                        val scale = (size * 0.60f) / 24f
+                        fun mx(x: Float) = cx + (x - 12f) * scale
+                        fun my(y: Float) = cy + (y - 12f) * scale
+                        
+                        val stroke = size * 0.046f
+                        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                        val join = androidx.compose.ui.graphics.StrokeJoin.Round
+                        
+                        // Capsule Path (Stroke)
+                        val path1 = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(mx(14.75f), my(7.33303f))
+                            lineTo(mx(14.75f), my(11.222f))
+                            cubicTo(mx(14.7728f), my(12.4877f), mx(13.7657f), my(13.5325f), mx(12.5f), my(13.556f))
+                            cubicTo(mx(11.2343f), my(13.5325f), mx(10.2271f), my(12.4877f), mx(10.25f), my(11.222f))
+                            lineTo(mx(10.25f), my(7.33303f))
+                            cubicTo(mx(10.2277f), my(6.06772f), mx(11.2347f), my(5.02357f), mx(12.5f), my(5.00003f))
+                            cubicTo(mx(13.7653f), my(5.02357f), mx(14.7723f), my(6.06772f), mx(14.75f), my(7.33303f))
+                            close()
+                        }
+                        drawPath(
+                            path1,
                             baseColor,
-                            topLeft = androidx.compose.ui.geometry.Offset(cx - size * 0.15f, cy - size * 0.30f),
-                            size = androidx.compose.ui.geometry.Size(size * 0.30f, size * 0.45f),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size * 0.12f, size * 0.12f),
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(size * 0.08f)
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = cap, join = join)
                         )
-                        drawLine(
+                        
+                        // Cradle & Stand Path (Fill)
+                        val path2 = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(mx(7.53767f), my(15.0346f))
+                            cubicTo(mx(10.4524f), my(17.3164f), mx(14.5476f), my(17.3164f), mx(17.4623f), my(15.0346f))
+                            lineTo(mx(16.5377f), my(13.8534f))
+                            cubicTo(mx(14.1661f), my(15.7101f), mx(10.8339f), my(15.7101f), mx(8.46233f), my(13.8534f))
+                            lineTo(mx(7.53767f), my(15.0346f))
+                            close()
+                            
+                            moveTo(mx(11.75f), my(16f))
+                            lineTo(mx(13.25f), my(16f))
+                            lineTo(mx(13.25f), my(19f))
+                            lineTo(mx(11.75f), my(19f))
+                            close()
+                        }
+                        drawPath(
+                            path2,
                             baseColor,
-                            androidx.compose.ui.geometry.Offset(cx, cy + size * 0.22f),
-                            androidx.compose.ui.geometry.Offset(cx, cy + size * 0.45f),
-                            size * 0.08f
+                            style = androidx.compose.ui.graphics.drawscope.Fill
                         )
                     }
                     OverlayAppearanceStore.STYLE_DOT -> {
@@ -2328,18 +2375,50 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawOverlayIcon(
     }
     when (appearance.style) {
         OverlayAppearanceStore.STYLE_MIC -> {
-            drawRoundRect(
+            val scale = (size * 0.60f) / 24f
+            fun mx(x: Float) = cx + (x - 12f) * scale
+            fun my(y: Float) = cy + (y - 12f) * scale
+            
+            val stroke = size * 0.046f
+            val cap = androidx.compose.ui.graphics.StrokeCap.Round
+            val join = androidx.compose.ui.graphics.StrokeJoin.Round
+            
+            // Capsule Path (Stroke)
+            val path1 = androidx.compose.ui.graphics.Path().apply {
+                moveTo(mx(14.75f), my(7.33303f))
+                lineTo(mx(14.75f), my(11.222f))
+                cubicTo(mx(14.7728f), my(12.4877f), mx(13.7657f), my(13.5325f), mx(12.5f), my(13.556f))
+                cubicTo(mx(11.2343f), my(13.5325f), mx(10.2271f), my(12.4877f), mx(10.25f), my(11.222f))
+                lineTo(mx(10.25f), my(7.33303f))
+                cubicTo(mx(10.2277f), my(6.06772f), mx(11.2347f), my(5.02357f), mx(12.5f), my(5.00003f))
+                cubicTo(mx(13.7653f), my(5.02357f), mx(14.7723f), my(6.06772f), mx(14.75f), my(7.33303f))
+                close()
+            }
+            drawPath(
+                path1,
                 iconColor,
-                topLeft = androidx.compose.ui.geometry.Offset(cx - size * 0.12f, cy - size * 0.24f),
-                size = androidx.compose.ui.geometry.Size(size * 0.24f, size * 0.36f),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(size * 0.10f, size * 0.10f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(size * 0.055f)
+                style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = cap, join = join)
             )
-            drawLine(
+            
+            // Cradle & Stand Path (Fill)
+            val path2 = androidx.compose.ui.graphics.Path().apply {
+                moveTo(mx(7.53767f), my(15.0346f))
+                cubicTo(mx(10.4524f), my(17.3164f), mx(14.5476f), my(17.3164f), mx(17.4623f), my(15.0346f))
+                lineTo(mx(16.5377f), my(13.8534f))
+                cubicTo(mx(14.1661f), my(15.7101f), mx(10.8339f), my(15.7101f), mx(8.46233f), my(13.8534f))
+                lineTo(mx(7.53767f), my(15.0346f))
+                close()
+                
+                moveTo(mx(11.75f), my(16f))
+                lineTo(mx(13.25f), my(16f))
+                lineTo(mx(13.25f), my(19f))
+                lineTo(mx(11.75f), my(19f))
+                close()
+            }
+            drawPath(
+                path2,
                 iconColor,
-                androidx.compose.ui.geometry.Offset(cx, cy + size * 0.18f),
-                androidx.compose.ui.geometry.Offset(cx, cy + size * 0.40f),
-                size * 0.055f
+                style = androidx.compose.ui.graphics.drawscope.Fill
             )
         }
         OverlayAppearanceStore.STYLE_DOT -> {
