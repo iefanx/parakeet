@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Paraflow Privacy Policy</title>
+  <meta name="description" content="Privacy policy for the Paraflow offline dictation app.">
+  <style>
+    :root { color-scheme: dark; --bg:#101113; --card:#191b1f; --text:#f5f5f7; --muted:#b4b6c0; --accent:#8d9aff; --line:#2c2f36; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { width:min(760px,calc(100% - 32px)); margin:48px auto; padding:clamp(24px,5vw,48px); background:var(--card); border:1px solid var(--line); border-radius:20px; }
+    .brand { color:var(--accent); font-weight:700; letter-spacing:.02em; }
+    h1 { margin:.25rem 0 0; font-size:clamp(2rem,6vw,3rem); line-height:1.15; }
+    h2 { margin-top:2rem; font-size:1.2rem; }
+    p,li { color:var(--muted); }
+    strong,a { color:var(--text); }
+    a:hover { color:var(--accent); }
+    .effective { margin-top:.5rem; font-size:.9rem; }
+    footer { margin-top:2.5rem; padding-top:1.25rem; border-top:1px solid var(--line); font-size:.9rem; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">PARAFLOW</div>
+  <h1>Privacy Policy</h1>
+  <p class="effective">Effective July 10, 2026</p>
+
+  <p>Paraflow is designed for private, offline speech-to-text. This policy explains how the Android app handles information.</p>
+
+  <h2>1. Offline processing</h2>
+  <p>Paraflow downloads its public speech-recognition model from Hugging Face during initial setup. After installation, recognition runs entirely on your device. Audio and transcribed text are never sent to Paraflow, Hugging Face, a cloud service, or another third party. Network access is used for model delivery only.</p>
+
+  <h2>2. Permissions and system access</h2>
+  <ul>
+    <li><strong>Microphone:</strong> captures audio only while you choose to dictate. Temporary audio is discarded after transcription.</li>
+    <li><strong>Accessibility Service:</strong> detects the focused editable field, displays the dictation control, and inserts only the transcription you request. Nearby text may be inspected to add spacing correctly.</li>
+    <li><strong>Battery optimization exemption:</strong> keeps user-enabled cross-app dictation available reliably while Paraflow is in the background.</li>
+    <li><strong>Internet and network state:</strong> downloads public model files from <code>huggingface.co</code> and reports progress. No voice, transcription, or history is included in these requests.</li>
+  </ul>
+
+  <h2>3. Local history</h2>
+  <p>Transcription history is stored in the app's private on-device storage. You can copy, delete, or clear it from the Usage tab. Uninstalling the app removes its local data.</p>
+
+  <h2>4. No tracking or sharing</h2>
+  <p>Optional translation uses Google ML Kit language packs and runs on-device after the selected pack is downloaded. Translation text is not sent to a cloud translation service. Paraflow has no accounts, advertising, analytics, telemetry, or cloud sync.</p>
+
+  <h2>5. Children's privacy</h2>
+  <p>The app is not directed specifically to children. Paraflow does not transmit personal information off-device or operate user accounts.</p>
+
+  <h2>6. Changes</h2>
+  <p>Policy changes may be published on this page and included with future app updates.</p>
+
+  <h2>7. Contact</h2>
+  <p>Email <a href="mailto:realiefan@gmail.com">realiefan@gmail.com</a> or visit the <a href="https://github.com/iefanx/paraflow">Paraflow GitHub repository</a>.</p>
+
+  <footer>Paraflow · Private, offline dictation</footer>
+</main>
+</body>
+</html>

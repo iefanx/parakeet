@@ -1,0 +1,27 @@
+# Local signing credentials — never commit these files.
+keystore.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+
+# Android / Gradle local state
+.gradle/
+local.properties
+build/
+app/build/
+modelpack/build/
+
+# The offline model is kept locally. GitHub's normal per-file limit is 100 MB.
+# See README.md for the expected local asset path.
+*.onnx
+
+# IDE files
+.idea/
+*.iml
+.DS_Store
+
+# Logs and local captures
+*.log
+captures/
+screenshots/
