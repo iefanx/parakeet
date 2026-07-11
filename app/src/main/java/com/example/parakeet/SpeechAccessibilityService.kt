@@ -10,10 +10,14 @@ import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -50,6 +54,45 @@ class SpeechAccessibilityService : AccessibilityService() {
     private var isRecording = false
     private var lastFocusedEditableTime = 0L
     private var overlayPrefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
+    private var quickSettingsOverlay: QuickSettingsOverlay? = null
+
+    // ─── Haptic feedback helper ───────────────────────────────────────
+    private fun performHaptic(type: HapticType = HapticType.TICK) {
+        val view = floatingView
+        if (view != null) {
+            val constant = when (type) {
+                HapticType.TICK -> if (Build.VERSION.SDK_INT >= 27) HapticFeedbackConstants.KEYBOARD_TAP else HapticFeedbackConstants.VIRTUAL_KEY
+                HapticType.HEAVY -> HapticFeedbackConstants.LONG_PRESS
+                HapticType.CONFIRM -> if (Build.VERSION.SDK_INT >= 30) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.LONG_PRESS
+                HapticType.REJECT -> if (Build.VERSION.SDK_INT >= 30) HapticFeedbackConstants.REJECT else HapticFeedbackConstants.VIRTUAL_KEY
+            }
+            view.performHapticFeedback(constant, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            return
+        }
+        // Fallback: no view is attached, use Vibrator directly
+        try {
+            val vibrator = if (Build.VERSION.SDK_INT >= 31) {
+                (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+            if (Build.VERSION.SDK_INT >= 26) {
+                val ms = when (type) {
+                    HapticType.TICK -> 8L
+                    HapticType.HEAVY -> 25L
+                    HapticType.CONFIRM -> 15L
+                    HapticType.REJECT -> 12L
+                }
+                vibrator.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(10L)
+            }
+        } catch (_: Exception) { }
+    }
+
+    private enum class HapticType { TICK, HEAVY, CONFIRM, REJECT }
 
     override fun onCreate() {
         super.onCreate()
@@ -93,6 +136,9 @@ class SpeechAccessibilityService : AccessibilityService() {
 
         val packageName = event.packageName?.toString()
         if (packageName == this.packageName) {
+            // The quick-settings card is itself an accessibility overlay. Keep it alive while
+            // its rows are being tapped; the card handles its own outside-tap dismissal.
+            if (quickSettingsOverlay?.isVisible == true) return
             // A tap on the accessibility overlay can be reported back as a click in our
             // own window. Once recording or processing has started, that event must not
             // be interpreted as a tap outside the editor and remove the active control.
@@ -174,7 +220,7 @@ class SpeechAccessibilityService : AccessibilityService() {
     }
 
     private fun scheduleOverlayVisibilityCheck(delayMs: Long = 80) {
-        if (isRecording || micDrawable?.isLoading == true) return
+        if (isRecording || micDrawable?.isLoading == true || quickSettingsOverlay?.isVisible == true) return
 
         visibilityJob?.cancel()
         visibilityJob = serviceScope.launch {
@@ -184,6 +230,7 @@ class SpeechAccessibilityService : AccessibilityService() {
     }
 
     private fun refreshOverlayVisibility() {
+        if (quickSettingsOverlay?.isVisible == true) return
         val isInsideApp = isParakeetForeground()
         val appearance = OverlayAppearanceStore.load(this)
         if (!isInsideApp && !appearance.enabled) {
@@ -333,20 +380,14 @@ class SpeechAccessibilityService : AccessibilityService() {
         }
 
         floatingView?.setOnClickListener {
+            performHaptic(HapticType.TICK)
             handleMicClick()
         }
 
         floatingView?.setOnLongClickListener {
-            try {
-                val intent = Intent(ctx, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                ctx.startActivity(intent)
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to launch MainActivity on long press", e)
-                false
-            }
+            performHaptic(HapticType.HEAVY)
+            showQuickSettings()
+            true
         }
 
         try {
@@ -356,6 +397,80 @@ class SpeechAccessibilityService : AccessibilityService() {
             floatingView = null
             micDrawable = null
             layoutParams = null
+        }
+    }
+
+    private fun showQuickSettings() {
+        if (isRecording || micDrawable?.isLoading == true) return
+        val view = floatingView ?: return
+        val params = layoutParams ?: return
+        if (quickSettingsOverlay?.isVisible == true) return
+
+        quickSettingsOverlay = QuickSettingsOverlay(this, object : QuickSettingsOverlay.Callbacks {
+            override fun onGrammarLevelSelected(level: Int) {
+                PostProcessingStore.saveGrammarLevel(this@SpeechAccessibilityService, level)
+                if (level > 0) {
+                    val language = when (level) {
+                        1 -> com.google.mlkit.nl.translate.TranslateLanguage.FRENCH
+                        2 -> com.google.mlkit.nl.translate.TranslateLanguage.SPANISH
+                        else -> com.google.mlkit.nl.translate.TranslateLanguage.GERMAN
+                    }
+                    serviceScope.launch {
+                        try {
+                            OnDeviceTranslationManager.download(language)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Grammar resources will download on first use", e)
+                        }
+                    }
+                }
+                val label = when (level) {
+                    1 -> "Low"
+                    2 -> "Medium"
+                    3 -> "Intense"
+                    else -> "Off"
+                }
+                Toast.makeText(this@SpeechAccessibilityService, "Grammar correction: $label", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onTranslationSelected(language: TranslationLanguageOption?) {
+                if (language == null) {
+                    PostProcessingStore.saveTranslation(
+                        this@SpeechAccessibilityService,
+                        enabled = false,
+                        target = PostProcessingStore.targetLanguage(this@SpeechAccessibilityService)
+                    )
+                    Toast.makeText(this@SpeechAccessibilityService, "Translation off", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                // Persist the choice immediately. The existing translation pipeline will retry
+                // the offline model download if the background warm-up cannot run right now.
+                PostProcessingStore.saveTranslation(
+                    this@SpeechAccessibilityService,
+                    enabled = true,
+                    target = language.tag
+                )
+                serviceScope.launch {
+                    try {
+                        OnDeviceTranslationManager.download(language.tag)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Translation model will download on first use", e)
+                    }
+                }
+                Toast.makeText(this@SpeechAccessibilityService, "Translation: ${language.name}", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onSettingsClicked() {
+                try {
+                    startActivity(Intent(Settings.ACTION_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    })
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to open Android Settings", e)
+                }
+            }
+        }).also {
+            it.show(windowManager ?: return, params, view.width, view.height)
         }
     }
 
@@ -423,6 +538,7 @@ class SpeechAccessibilityService : AccessibilityService() {
             if (success) {
                 isRecording = true
                 micDrawable?.isRecording = true
+                performHaptic(HapticType.CONFIRM)
                 
                 // Start elapsed timer loop
                 secondsElapsed = 0
@@ -437,12 +553,14 @@ class SpeechAccessibilityService : AccessibilityService() {
                 }
                 Toast.makeText(this, "Recording started...", Toast.LENGTH_SHORT).show()
             } else {
+                performHaptic(HapticType.REJECT)
                 Toast.makeText(this, "Failed to start recording. Check microphone permission.", Toast.LENGTH_SHORT).show()
             }
         } else {
             isRecording = false
             timerJob?.cancel()
             timerJob = null
+            performHaptic(HapticType.CONFIRM)
             
             micDrawable?.isRecording = false
             micDrawable?.isLoading = true
@@ -569,6 +687,8 @@ class SpeechAccessibilityService : AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        quickSettingsOverlay?.dismiss()
+        quickSettingsOverlay = null
         timerJob?.cancel()
         transcribeJob?.cancel()
         visibilityJob?.cancel()

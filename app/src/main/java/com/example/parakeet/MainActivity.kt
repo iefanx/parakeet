@@ -997,12 +997,16 @@ fun DashboardScreen(onResetOnboarding: (Int) -> Unit) {
 
 @Composable
 private fun TabItem(label: String, active: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val view = androidx.compose.ui.platform.LocalView.current
     Box(
         modifier
             .height(34.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(if (active) BgElevated else Color.Transparent)
-            .clickable(onClick = onClick),
+            .clickable {
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+                onClick()
+            },
         contentAlignment = Alignment.Center
     ) {
         Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium,
@@ -1012,12 +1016,16 @@ private fun TabItem(label: String, active: Boolean, modifier: Modifier = Modifie
 
 @Composable
 private fun CompactActionPill(label: String, onClick: () -> Unit) {
+    val view = androidx.compose.ui.platform.LocalView.current
     Box(
         Modifier.height(28.dp)
             .clip(RoundedCornerShape(99.dp))
             .background(if (label.contains("Back")) BgElevated else Accent.copy(alpha = .09f))
             .border(1.dp, if (label.contains("Back")) DividerColor else Accent.copy(alpha = .28f), RoundedCornerShape(99.dp))
-            .clickable(onClick = onClick)
+            .clickable {
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+                onClick()
+            }
             .padding(horizontal = 11.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -1506,6 +1514,7 @@ private fun PostProcessingPanel() {
 
         // Grammar Correction Options with Segmented Selector
         Column(Modifier.fillMaxWidth()) {
+            val hapticView = androidx.compose.ui.platform.LocalView.current
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1538,7 +1547,10 @@ private fun PostProcessingPanel() {
                             .weight(1f)
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (selected) Accent else Color.Transparent)
-                            .clickable(enabled = !grammarDownloading) { selectGrammarLevel(index) }
+                            .clickable(enabled = !grammarDownloading) {
+                                hapticView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+                                selectGrammarLevel(index)
+                            }
                             .padding(vertical = 5.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -2168,6 +2180,7 @@ private fun AppearanceTab(
 
         // 2. BUTTON DESIGN STYLE SELECTOR WITH GRAPHICAL ICON PREVIEWS
         SettingPanel("Style", "") {
+            val hapticView = androidx.compose.ui.platform.LocalView.current
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
@@ -2186,6 +2199,7 @@ private fun AppearanceTab(
                                 .background(bg)
                                 .border(1.dp, border, RoundedCornerShape(14.dp))
                                 .clickable {
+                                    hapticView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
                                     if (style == OverlayAppearanceStore.STYLE_CUSTOM_IMAGE) {
                                         val hasImage = OverlayAppearanceStore.customImageFile(context).exists()
                                         if (!hasImage) {
@@ -2226,6 +2240,7 @@ private fun AppearanceTab(
 
         // 3. COLOR SELECTOR WITH SPECTRUM GRADIENT AND CIRCLE PRESETS
         SettingPanel("Accent Color", "") {
+            val hapticView = androidx.compose.ui.platform.LocalView.current
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(
                     Modifier.fillMaxWidth(),
@@ -2244,7 +2259,10 @@ private fun AppearanceTab(
                                     color = if (selected) TextPrimary else DividerColor,
                                     shape = CircleShape
                                 )
-                                .clickable { onAppearanceChange(appearance.copy(accentColor = color)) }
+                                .clickable {
+                                    hapticView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+                                    onAppearanceChange(appearance.copy(accentColor = color))
+                                }
                         )
                     }
                 }
