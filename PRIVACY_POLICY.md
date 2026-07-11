@@ -21,10 +21,10 @@ To provide offline dictation, the App requests specific system permissions. We u
 * **Local History:** Your transcription history is stored locally on your device in the App's private directory. 
 * **User Control:** You can view, copy, or permanently clear your transcription history at any time from the "Usage" tab in the App. If you uninstall the App, all local history is permanently deleted by the Android system.
 
-## 4. On-Device Translation and No Tracking
-If you enable translation, Paraflow uses Google ML Kit to download the language pack you select and translate text on your device. Translation content is not sent to a cloud translation service. Paraflow does not include advertising, analytics, accounts, or telemetry.
+## 4. On-Device Translation, Grammar Correction, and No Tracking
+Optional translation uses Google ML Kit language packs, and optional grammar correction uses local intermediate translation loops (using Spanish, French, and German). All translation, grammar correction, and transcription processing are performed entirely offline on your device. No text is sent to any cloud services. Paraflow does not include advertising, analytics, accounts, or telemetry.
 
-## 5. Children's Privacy
+## 5. Children's privacy
 The App is not directed specifically to children. Paraflow does not transmit personal information off-device or operate user accounts.
 
 ## 6. Changes to This Privacy Policy
@@ -33,4 +33,4 @@ We may update this Privacy Policy from time to time. Changes may be published on
 ## 7. Contact Us
 If you have any questions or feedback about this Privacy Policy, please contact us at:
 * **Developer/Support Email:** realiefan@gmail.com
-* **GitHub Repository:** https://github.com/iefanx/paraflow
+* **GitHub Repository:** https://github.com/iefanx/parakeet
