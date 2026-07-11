@@ -2061,6 +2061,9 @@ private fun HueSpectrumSlider(
     }
     val hue = hsv[0]
     
+    val updatedHue = androidx.compose.runtime.rememberUpdatedState(hue)
+    val updatedOnColorChange = androidx.compose.runtime.rememberUpdatedState(onColorChange)
+    
     BoxWithConstraints(modifier.fillMaxWidth().height(26.dp)) {
         Canvas(Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp))) {
             val spectrumColors = listOf(
@@ -2079,24 +2082,24 @@ private fun HueSpectrumSlider(
         Box(
             Modifier
                 .fillMaxSize()
-                .pointerInput(currentColor) {
+                .pointerInput(Unit) {
                     detectTapGestures(
                         onPress = { offset ->
                             val fraction = (offset.x / maxPx).coerceIn(0f, 1f)
                             val selectedHue = fraction * 360f
                             val newHsv = floatArrayOf(selectedHue, 1f, 1f)
-                            onColorChange(android.graphics.Color.HSVToColor(newHsv))
+                            updatedOnColorChange.value(android.graphics.Color.HSVToColor(newHsv))
                         }
                     )
                 }
-                .pointerInput(currentColor) {
+                .pointerInput(Unit) {
                     detectHorizontalDragGestures { change, dragAmount ->
                         change.consume()
-                        val currentFraction = hue / 360f
+                        val currentFraction = updatedHue.value / 360f
                         val newFraction = (currentFraction + dragAmount / maxPx).coerceIn(0f, 1f)
                         val selectedHue = newFraction * 360f
                         val newHsv = floatArrayOf(selectedHue, 1f, 1f)
-                        onColorChange(android.graphics.Color.HSVToColor(newHsv))
+                        updatedOnColorChange.value(android.graphics.Color.HSVToColor(newHsv))
                     }
                 }
         ) {
