@@ -48,6 +48,7 @@ class SpeechAccessibilityService : AccessibilityService() {
     private var transcribeJob: Job? = null
     private var visibilityJob: Job? = null
     private var isRecording = false
+    private var lastFocusedEditableTime = 0L
     private var overlayPrefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
     override fun onCreate() {
@@ -82,6 +83,7 @@ class SpeechAccessibilityService : AccessibilityService() {
         val eventNode = try { event.source } catch (_: Exception) { null }
         val eventNodeIsEditable = try { eventNode?.isEditable == true } catch (_: Exception) { false }
         if (eventNodeIsEditable) {
+            lastFocusedEditableTime = System.currentTimeMillis()
             updateFocusedNode(eventNode)
             try { eventNode?.recycle() } catch (_: Exception) { }
             showFloatingButton()
@@ -194,6 +196,7 @@ class SpeechAccessibilityService : AccessibilityService() {
             .getBoolean(OverlayAppearanceStore.APPEARANCE_TAB_ACTIVE_KEY, false) && isInsideApp
 
         if (focusedEditable != null) {
+            lastFocusedEditableTime = System.currentTimeMillis()
             Log.d(TAG, "Focused editable field found in ${focusedEditable.packageName}")
             updateFocusedNode(focusedEditable)
             try {
@@ -205,15 +208,20 @@ class SpeechAccessibilityService : AccessibilityService() {
         } else if (appearanceTabActive) {
             showFloatingButton()
         } else {
-            Log.d(TAG, "No focused editable field")
-            val retainedOwnEditor = try {
-                focusedNode?.packageName?.toString() == packageName && isInsideApp
-            } catch (_: Exception) { false }
-            if (retainedOwnEditor) {
+            val now = System.currentTimeMillis()
+            if (now - lastFocusedEditableTime < 1500) {
                 showFloatingButton()
             } else {
-                updateFocusedNode(null)
-                if (appearance.alwaysShow) showFloatingButton() else hideFloatingButton()
+                Log.d(TAG, "No focused editable field")
+                val retainedOwnEditor = try {
+                    focusedNode?.packageName?.toString() == packageName && isInsideApp
+                } catch (_: Exception) { false }
+                if (retainedOwnEditor) {
+                    showFloatingButton()
+                } else {
+                    updateFocusedNode(null)
+                    if (appearance.alwaysShow) showFloatingButton() else hideFloatingButton()
+                }
             }
         }
     }

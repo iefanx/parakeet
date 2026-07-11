@@ -979,7 +979,9 @@ fun DashboardScreen(onResetOnboarding: (Int) -> Unit) {
                         })
                     },
                     appearance = overlayAppearance,
-                    onAppearanceChange = { saveOverlayAppearance(it) }
+                    onAppearanceChange = { saveOverlayAppearance(it) },
+                    onRecord = { handleRecord() },
+                    elapsed = elapsed
                 )
             } else {
                 AppearanceTab(
@@ -1040,18 +1042,22 @@ private fun PlaygroundTab(
     onRetryModel: () -> Unit,
     onConfigA11y: () -> Unit, onConfigBattery: () -> Unit,
     appearance: OverlayAppearance,
-    onAppearanceChange: (OverlayAppearance) -> Unit
+    onAppearanceChange: (OverlayAppearance) -> Unit,
+    onRecord: () -> Unit,
+    elapsed: Int
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val outsideTap = remember { MutableInteractionSource() }
+    var isNotepadFocused by remember { mutableStateOf(false) }
 
-    Column(
-        Modifier.fillMaxSize().clickable(
-            interactionSource = outsideTap,
-            indication = null
-        ) { focusManager.clearFocus() }
-    ) {
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            Modifier.fillMaxSize().clickable(
+                interactionSource = outsideTap,
+                indication = null
+            ) { focusManager.clearFocus() }
+        ) {
         // Scrollable content area for top modules (Activities, Perms, Smart Outputs)
         Column(
             modifier = Modifier
@@ -1286,6 +1292,7 @@ private fun PlaygroundTab(
                 modifier = Modifier
                     .weight(1f)
                     .onFocusChanged {
+                        isNotepadFocused = it.isFocused
                         SpeechAccessibilityService.setInAppEditorFocused(context, it.isFocused)
                     },
                 singleLine = true,
@@ -1309,6 +1316,23 @@ private fun PlaygroundTab(
             )
         }
         Spacer(Modifier.height(16.dp))
+        }
+
+        // Local Compose Record Button Overlay (displays when keyboard is active and accessibility is off)
+        if (isNotepadFocused && !hasA11y) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 20.dp, bottom = 74.dp) // Float just above the 54.dp input bar
+            ) {
+                RecordButton(
+                    appState = appState,
+                    elapsed = elapsed,
+                    appearance = appearance,
+                    onClick = onRecord
+                )
+            }
+        }
     }
 }
 
@@ -1515,7 +1539,7 @@ private fun PostProcessingPanel() {
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (selected) Accent else Color.Transparent)
                             .clickable(enabled = !grammarDownloading) { selectGrammarLevel(index) }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 5.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
