@@ -5,57 +5,569 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>Paraflow Privacy Policy</title>
-  <meta name="description" content="Privacy policy for the Paraflow offline dictation app.">
+  <meta name="description" content="Privacy policy for the Paraflow offline dictation Android application.">
+  
+  <!-- Modern Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root { color-scheme: dark; --bg:#101113; --card:#191b1f; --text:#f5f5f7; --muted:#b4b6c0; --accent:#8d9aff; --line:#2c2f36; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    main { width:min(760px,calc(100% - 32px)); margin:48px auto; padding:clamp(24px,5vw,48px); background:var(--card); border:1px solid var(--line); border-radius:20px; }
-    .brand { color:var(--accent); font-weight:700; letter-spacing:.02em; }
-    h1 { margin:.25rem 0 0; font-size:clamp(2rem,6vw,3rem); line-height:1.15; }
-    h2 { margin-top:2rem; font-size:1.2rem; }
-    p,li { color:var(--muted); }
-    strong,a { color:var(--text); }
-    a:hover { color:var(--accent); }
-    .effective { margin-top:.5rem; font-size:.9rem; }
-    footer { margin-top:2.5rem; padding-top:1.25rem; border-top:1px solid var(--line); font-size:.9rem; }
+    :root {
+      color-scheme: dark;
+      --bg: #0b0c10;
+      --bg-gradient: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent 40%),
+                     radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.03), transparent 30%);
+      --card-bg: rgba(17, 18, 25, 0.65);
+      --card-border: rgba(255, 255, 255, 0.07);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      /* Accents and Gradients */
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --accent: #a855f7;
+      --gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      
+      --font-display: 'Outfit', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+
+    /* Custom Scrollbar for modern look */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      background-image: var(--bg-gradient);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Main Grid Layout */
+    .layout-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 80px 40px;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    /* Sticky Sidebar Navigation */
+    aside {
+      position: sticky;
+      top: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .brand-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tagline {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-left: 2px solid rgba(255, 255, 255, 0.05);
+      padding-left: 16px;
+    }
+
+    .nav-item {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: var(--transition);
+      padding: 6px 0;
+      display: inline-block;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Main Policy Card Container */
+    main {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 56px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .policy-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 32px;
+      margin-bottom: 40px;
+    }
+
+    .effective-date {
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      margin-bottom: 12px;
+      background: rgba(99, 102, 241, 0.08);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(99, 102, 241, 0.15);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 16px 0;
+      line-height: 1.15;
+    }
+
+    .intro-text {
+      font-size: 1.15rem;
+      color: var(--text);
+      margin: 0;
+      font-weight: 400;
+      opacity: 0.95;
+    }
+
+    section {
+      margin-bottom: 48px;
+      scroll-margin-top: 40px;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background: var(--gradient);
+      border-radius: 2px;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin: 0 0 20px 0;
+      font-size: 1.05rem;
+    }
+
+    strong {
+      color: var(--text);
+    }
+
+    /* Grid Layout for Permissions Section */
+    .permissions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 24px 0;
+    }
+
+    .permission-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 16px;
+      padding: 24px;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .permission-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(99, 102, 241, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .permission-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      transition: var(--transition);
+    }
+
+    .permission-card:hover .permission-icon {
+      background: var(--gradient);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .permission-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .permission-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Highlight Card styling */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(168, 85, 247, 0.03) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.1);
+      border-radius: 16px;
+      padding: 28px;
+      margin: 24px 0;
+    }
+
+    /* Quick Links list */
+    .contact-links {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .contact-links li a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .contact-links li a:hover {
+      color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 56px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .footer-brand {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 1024px) {
+      .layout-wrapper {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 40px 24px;
+      }
+
+      aside {
+        position: relative;
+        top: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding-bottom: 24px;
+      }
+
+      .nav-menu {
+        display: none; /* Hide TOC on mobile/tablet to keep it clean */
+      }
+
+      main {
+        padding: 40px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 28px;
+        border-radius: 16px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+
+      .permissions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
-<main>
-  <div class="brand">PARAFLOW</div>
-  <h1>Privacy Policy</h1>
-  <p class="effective">Effective July 10, 2026</p>
 
-  <p>Paraflow is designed for private, offline speech-to-text. This policy explains how the Android app handles information.</p>
+<div class="layout-wrapper">
+  <!-- Left Column: Sticky branding and sidebar TOC -->
+  <aside>
+    <div class="brand-section">
+      <div class="brand-logo">
+        <div class="brand-icon">
+          <!-- Sleek Waveform Logo Icon -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="9" width="3" height="6" rx="1.5" fill="white"/>
+            <rect x="9" y="5" width="3" height="14" rx="1.5" fill="white"/>
+            <rect x="14" y="8" width="3" height="8" rx="1.5" fill="white"/>
+            <rect x="19" y="11" width="3" height="4" rx="1.5" fill="white"/>
+          </svg>
+        </div>
+        <span class="brand-name">Paraflow</span>
+      </div>
+      <div class="brand-tagline">Private, offline speech dictation.</div>
+    </div>
 
-  <h2>1. Offline processing</h2>
-  <p>Paraflow downloads its public speech-recognition model from Hugging Face during initial setup. After installation, recognition runs entirely on your device. Audio and transcribed text are never sent to Paraflow, Hugging Face, a cloud service, or another third party. Network access is used for model delivery only.</p>
+    <!-- Active Table of Contents -->
+    <nav class="nav-menu">
+      <a href="#offline" class="nav-item">1. Offline processing</a>
+      <a href="#permissions" class="nav-item">2. Permissions and system access</a>
+      <a href="#history" class="nav-item">3. Local history</a>
+      <a href="#no-tracking" class="nav-item">4. No tracking or sharing</a>
+      <a href="#children" class="nav-item">5. Children's privacy</a>
+      <a href="#changes" class="nav-item">6. Changes</a>
+      <a href="#contact" class="nav-item">7. Contact & Support</a>
+    </nav>
+  </aside>
 
-  <h2>2. Permissions and system access</h2>
-  <ul>
-    <li><strong>Microphone:</strong> captures audio only while you choose to dictate. Temporary audio is discarded after transcription.</li>
-    <li><strong>Accessibility Service:</strong> detects the focused editable field, displays the dictation control, and inserts only the transcription you request. Nearby text may be inspected to add spacing correctly.</li>
-    <li><strong>Battery optimization exemption:</strong> keeps user-enabled cross-app dictation available reliably while Paraflow is in the background.</li>
-    <li><strong>Internet and network state:</strong> downloads public model files from <code>huggingface.co</code> and reports progress. No voice, transcription, or history is included in these requests.</li>
-  </ul>
+  <!-- Right Column: Main reading container -->
+  <main>
+    <header class="policy-header">
+      <span class="effective-date">Effective July 10, 2026</span>
+      <h1>Privacy Policy</h1>
+      <p class="intro-text">Paraflow is designed from the ground up for private, offline speech-to-text dictation. This policy describes how our Android application handles your information.</p>
+    </header>
 
-  <h2>3. Local history</h2>
-  <p>Transcription history is stored in the app's private on-device storage. You can copy, delete, or clear it from the Usage tab. Uninstalling the app removes its local data.</p>
+    <!-- 1. Offline Processing -->
+    <section id="offline">
+      <h2>1. Offline processing</h2>
+      <div class="highlight-box">
+        <p style="margin: 0; color: var(--text); font-weight: 500;">
+          Your voice and text never leave your device.
+        </p>
+        <p style="margin: 12px 0 0 0; font-size: 0.98rem;">
+          Paraflow downloads its public speech-recognition models from Hugging Face during your initial setup. After installation, all speech-to-text recognition runs entirely on your device. Audio and transcribed texts are never sent to Paraflow, Hugging Face, or any cloud services.
+        </p>
+      </div>
+    </section>
 
-  <h2>4. No tracking or sharing</h2>
-  <p>Optional translation uses Google ML Kit language packs, and optional grammar correction uses local intermediate translation loops (using Spanish, French, and German). All translation, grammar correction, and transcription processing are performed entirely offline on your device. No text is sent to any cloud services. Paraflow has no accounts, advertising, analytics, telemetry, or cloud sync.</p>
+    <!-- 2. Permissions -->
+    <section id="permissions">
+      <h2>2. Permissions and system access</h2>
+      <p>To enable cross-app dictation and device support, the App requests specific system permissions. We use these permissions strictly to provide local functionality:</p>
+      
+      <div class="permissions-grid">
+        <!-- Card 1 -->
+        <div class="permission-card">
+          <div class="permission-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+          </div>
+          <h3 class="permission-title">Microphone Access</h3>
+          <p class="permission-desc">Captures audio only while you dictate. Audio is processed in temporary memory and immediately discarded after transcription.</p>
+        </div>
 
-  <h2>5. Children's privacy</h2>
-  <p>The app is not directed specifically to children. Paraflow does not transmit personal information off-device or operate user accounts.</p>
+        <!-- Card 2 -->
+        <div class="permission-card">
+          <div class="permission-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h3 class="permission-title">Accessibility Service</h3>
+          <p class="permission-desc">Used strictly to detect text inputs, display the floating dictation button, and paste transcribed text at your cursor position.</p>
+        </div>
 
-  <h2>6. Changes</h2>
-  <p>Policy changes may be published on this page and included with future app updates.</p>
+        <!-- Card 3 -->
+        <div class="permission-card">
+          <div class="permission-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="16" height="10" rx="2" ry="2"/>
+              <line x1="22" x2="22" y1="11" y2="13"/>
+              <line x1="6" x2="6" y1="11" y2="13"/>
+            </svg>
+          </div>
+          <h3 class="permission-title">Battery Optimization</h3>
+          <p class="permission-desc">Exempts the app from background limits to ensure that the floating trigger button remains active and responsive when needed.</p>
+        </div>
 
-  <h2>7. Contact</h2>
-  <p>Email <a href="mailto:realiefan@gmail.com">realiefan@gmail.com</a> or visit the <a href="https://github.com/iefanx/parakeet">Paraflow GitHub repository</a>.</p>
+        <!-- Card 4 -->
+        <div class="permission-card">
+          <div class="permission-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+              <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+              <line x1="12" x2="12.01" y1="20" y2="20"/>
+            </svg>
+          </div>
+          <h3 class="permission-title">Network & Internet</h3>
+          <p class="permission-desc">Used only to download the initial public language model files from Hugging Face. No voice data or transcription history is included.</p>
+        </div>
+      </div>
+    </section>
 
-  <footer>Paraflow · Private, offline dictation</footer>
-</main>
+    <!-- 3. Local History -->
+    <section id="history">
+      <h2>3. Local history</h2>
+      <p>Your transcription history is saved exclusively within the App's private local database on your device. You can view, search, copy, or purge your history at any time from the **Usage** tab. Uninstalling the app permanently deletes all of this local database state.</p>
+    </section>
+
+    <!-- 4. No Tracking -->
+    <section id="no-tracking">
+      <h2>4. No tracking or sharing</h2>
+      <p>Optional translation services rely on Google ML Kit local packages. Optional grammar correction uses local translation loops (utilizing German, French, and Spanish models). All operations run 100% offline. Paraflow has no advertisements, analytics tracking, remote servers, or telemetric data collections.</p>
+    </section>
+
+    <!-- 5. Children's Privacy -->
+    <section id="children">
+      <h2>5. Children's privacy</h2>
+      <p>Paraflow is intended as a general-purpose voice dictation utility. The app does not manage accounts, collect personal credentials, or transmit data off-device, making it safe for all ages.</p>
+    </section>
+
+    <!-- 6. Changes -->
+    <section id="changes">
+      <h2>6. Changes</h2>
+      <p>We may update this Privacy Policy from time to time to document new local options. Updated versions will be published on this webpage and outlined in the app's update release notes.</p>
+    </section>
+
+    <!-- 7. Contact -->
+    <section id="contact">
+      <h2>7. Contact & Support</h2>
+      <p>If you have questions, feedback, or need help with the app, please feel free to reach out:</p>
+      
+      <ul class="contact-links">
+        <li>
+          <a href="mailto:realiefan@gmail.com">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            realiefan@gmail.com
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/iefanx/parakeet" target="_blank" rel="noopener noreferrer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+            Paraflow GitHub Repository
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <span>&copy; 2026 <span class="footer-brand">Paraflow</span> · Private, offline dictation</span>
+      <span>Built with security by default</span>
+    </footer>
+  </main>
+</div>
+
 </body>
 </html>
