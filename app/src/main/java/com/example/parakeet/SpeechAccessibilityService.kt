@@ -34,6 +34,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 class SpeechAccessibilityService : AccessibilityService() {
     private val TAG = "SpeechAccessibility"
@@ -52,7 +53,6 @@ class SpeechAccessibilityService : AccessibilityService() {
     private var transcribeJob: Job? = null
     private var visibilityJob: Job? = null
     private var isRecording = false
-    private var lastFocusedEditableTime = 0L
     private var overlayPrefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
     private var quickSettingsOverlay: QuickSettingsOverlay? = null
 
@@ -96,23 +96,13 @@ class SpeechAccessibilityService : AccessibilityService() {
 
     override fun onCreate() {
         super.onCreate()
+        activeInstance = WeakReference(this)
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         overlayPrefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key in overlayAppearanceKeys) {
                 applyFloatingButtonAppearance()
                 if (key == OverlayAppearanceStore.ALWAYS_SHOW_KEY || key == OverlayAppearanceStore.APPEARANCE_TAB_ACTIVE_KEY || key == OverlayAppearanceStore.ENABLED_KEY) {
                     scheduleOverlayVisibilityCheck(0)
-                }
-            }
-            if (key == OverlayAppearanceStore.IN_APP_EDITOR_FOCUSED_KEY) {
-                if (OverlayAppearanceStore.isInAppEditorFocused(this) && isParakeetForeground()) {
-                    // Compose fields are not consistently exposed as FOCUS_INPUT nodes to an
-                    // accessibility service. Treat the app's explicit focus bridge as the
-                    // source of truth while Paraflow itself is foreground.
-                    showFloatingButton()
-                } else {
-                    updateFocusedNode(null)
-                    hideFloatingButton()
                 }
             }
         }
@@ -124,9 +114,13 @@ class SpeechAccessibilityService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         val eventNode = try { event.source } catch (_: Exception) { null }
-        val eventNodeIsEditable = try { eventNode?.isEditable == true } catch (_: Exception) { false }
-        if (eventNodeIsEditable) {
-            lastFocusedEditableTime = System.currentTimeMillis()
+        val eventNodeHasInputFocus = try {
+            eventNode?.isEditable == true &&
+                eventNode.isFocused &&
+                eventNode.isVisibleToUser &&
+                isActiveApplicationPackage(event.packageName?.toString())
+        } catch (_: Exception) { false }
+        if (eventNodeHasInputFocus) {
             updateFocusedNode(eventNode)
             try { eventNode?.recycle() } catch (_: Exception) { }
             showFloatingButton()
@@ -144,8 +138,9 @@ class SpeechAccessibilityService : AccessibilityService() {
             // be interpreted as a tap outside the editor and remove the active control.
             if (isRecording || micDrawable?.isLoading == true) return
             if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-                updateFocusedNode(null)
-                hideFloatingButton()
+                // Compose reports its focus bridge independently. Reconcile both signals
+                // after the click instead of treating every in-app click as focus loss.
+                scheduleOverlayVisibilityCheck(0)
                 return
             }
             scheduleOverlayVisibilityCheck()
@@ -167,15 +162,20 @@ class SpeechAccessibilityService : AccessibilityService() {
     }
 
     private fun isParakeetForeground(): Boolean {
-        val activeWindows = windows ?: return rootInActiveWindow?.packageName?.toString() == packageName
+        return isActiveApplicationPackage(packageName)
+    }
+
+    private fun isActiveApplicationPackage(candidate: String?): Boolean {
+        if (candidate == null) return false
+        val activeWindows = windows ?: return rootInActiveWindow?.packageName?.toString() == candidate
         for (window in activeWindows) {
-            if (window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
+            if (window.type == AccessibilityWindowInfo.TYPE_APPLICATION && (window.isActive || window.isFocused)) {
                 val rootPackage = try {
                     window.root?.packageName?.toString()
                 } catch (e: Exception) {
                     null
                 }
-                if (rootPackage == packageName) return true
+                if (rootPackage == candidate) return true
             }
         }
         return false
@@ -185,7 +185,9 @@ class SpeechAccessibilityService : AccessibilityService() {
         val roots = mutableListOf<AccessibilityNodeInfo?>()
         roots.add(rootInActiveWindow)
         windows?.forEach { window ->
-            if (window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
+            // Background windows often retain an input-focused node after the user has
+            // navigated away. Only an active/focused application window can be typing now.
+            if (window.type == AccessibilityWindowInfo.TYPE_APPLICATION && (window.isActive || window.isFocused)) {
                 roots.add(try {
                     window.root
                 } catch (e: Exception) {
@@ -202,7 +204,7 @@ class SpeechAccessibilityService : AccessibilityService() {
             } ?: continue
 
             val usable = try {
-                focused.isEditable
+                focused.isEditable && focused.isFocused && focused.isVisibleToUser
             } catch (e: Exception) {
                 false
             }
@@ -239,11 +241,10 @@ class SpeechAccessibilityService : AccessibilityService() {
         }
 
         val focusedEditable = findFocusedEditableNode()
-        val appearanceTabActive = getSharedPreferences(OverlayAppearanceStore.PREFS, Context.MODE_PRIVATE)
-            .getBoolean(OverlayAppearanceStore.APPEARANCE_TAB_ACTIVE_KEY, false) && isInsideApp
+        val appearanceTabActive = isInsideApp && isAppearancePreviewActive
+        val inAppEditorFocused = isInsideApp && isOwnEditorFocused
 
         if (focusedEditable != null) {
-            lastFocusedEditableTime = System.currentTimeMillis()
             Log.d(TAG, "Focused editable field found in ${focusedEditable.packageName}")
             updateFocusedNode(focusedEditable)
             try {
@@ -252,24 +253,12 @@ class SpeechAccessibilityService : AccessibilityService() {
                 // Ignore stale accessibility nodes.
             }
             showFloatingButton()
-        } else if (appearanceTabActive) {
+        } else if (inAppEditorFocused || appearanceTabActive) {
             showFloatingButton()
         } else {
-            val now = System.currentTimeMillis()
-            if (now - lastFocusedEditableTime < 1500) {
-                showFloatingButton()
-            } else {
-                Log.d(TAG, "No focused editable field")
-                val retainedOwnEditor = try {
-                    focusedNode?.packageName?.toString() == packageName && isInsideApp
-                } catch (_: Exception) { false }
-                if (retainedOwnEditor) {
-                    showFloatingButton()
-                } else {
-                    updateFocusedNode(null)
-                    if (appearance.alwaysShow) showFloatingButton() else hideFloatingButton()
-                }
-            }
+            Log.d(TAG, "No focused editable field")
+            updateFocusedNode(null)
+            if (appearance.alwaysShow) showFloatingButton() else hideFloatingButton()
         }
     }
 
@@ -462,11 +451,12 @@ class SpeechAccessibilityService : AccessibilityService() {
 
             override fun onSettingsClicked() {
                 try {
-                    startActivity(Intent(Settings.ACTION_SETTINGS).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    })
+                    val intent = packageManager.getLaunchIntentForPackage(packageName)
+                        ?: Intent(this@SpeechAccessibilityService, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    startActivity(intent)
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to open Android Settings", e)
+                    Log.e(TAG, "Failed to open Paraflow app", e)
                 }
             }
         }).also {
@@ -700,9 +690,14 @@ class SpeechAccessibilityService : AccessibilityService() {
         serviceScope.coroutineContext.cancelChildren() // Clean up any active coroutines
         updateFocusedNode(null)
         hideFloatingButton()
+        if (activeInstance.get() === this) activeInstance.clear()
     }
 
     companion object {
+        @Volatile private var isOwnEditorFocused = false
+        @Volatile private var isAppearancePreviewActive = false
+        private var activeInstance = WeakReference<SpeechAccessibilityService>(null)
+
         private val overlayAppearanceKeys = setOf(
             OverlayAppearanceStore.SIZE_KEY,
             OverlayAppearanceStore.OPACITY_KEY,
@@ -716,8 +711,18 @@ class SpeechAccessibilityService : AccessibilityService() {
         )
 
         fun setInAppEditorFocused(context: Context, focused: Boolean) {
+            isOwnEditorFocused = focused
+            // Remove values written by older builds so an update can never resurrect focus.
             context.getSharedPreferences(OverlayAppearanceStore.PREFS, Context.MODE_PRIVATE)
-                .edit().putBoolean(OverlayAppearanceStore.IN_APP_EDITOR_FOCUSED_KEY, focused).apply()
+                .edit().remove(OverlayAppearanceStore.IN_APP_EDITOR_FOCUSED_KEY).apply()
+            activeInstance.get()?.scheduleOverlayVisibilityCheck(0)
+        }
+
+        fun setAppearancePreviewActive(context: Context, active: Boolean) {
+            isAppearancePreviewActive = active
+            context.getSharedPreferences(OverlayAppearanceStore.PREFS, Context.MODE_PRIVATE)
+                .edit().remove(OverlayAppearanceStore.APPEARANCE_TAB_ACTIVE_KEY).apply()
+            activeInstance.get()?.scheduleOverlayVisibilityCheck(0)
         }
 
         fun isEnabled(context: Context): Boolean {

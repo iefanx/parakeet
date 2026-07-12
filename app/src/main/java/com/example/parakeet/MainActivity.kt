@@ -773,6 +773,7 @@ private fun PrivacyPolicyDialog(onDismiss: () -> Unit) {
 @Composable
 fun DashboardScreen(onResetOnboarding: (Int) -> Unit) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
     val recognizer = SpeechManager.getRecognizer(context)
     val recorder = SpeechManager.getRecorder()
@@ -810,12 +811,29 @@ fun DashboardScreen(onResetOnboarding: (Int) -> Unit) {
 
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner) {
-        val obs = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_RESUME) refresh() }
+        val obs = LifecycleEventObserver { _, e ->
+            if (e == Lifecycle.Event.ON_RESUME) {
+                // Android/Compose may restore the last TextField focus after an app update or
+                // task resume. A fresh foreground session should not look like an intentional
+                // request to type until the user taps an editor again.
+                scope.launch {
+                    // Focus restoration occurs after ON_RESUME on some Samsung/Compose builds.
+                    // Clear on the following UI frames so the restored node cannot win.
+                    delay(150)
+                    focusManager.clearFocus(force = true)
+                    SpeechAccessibilityService.setInAppEditorFocused(context, false)
+                }
+                refresh()
+            }
+        }
         owner.lifecycle.addObserver(obs)
         onDispose { owner.lifecycle.removeObserver(obs) }
     }
 
     LaunchedEffect(Unit) {
+        delay(150)
+        focusManager.clearFocus(force = true)
+        SpeechAccessibilityService.setInAppEditorFocused(context, false)
         refresh()
         state = AppState.LOADING_MODEL
         val ok = recognizer.loadModel()
@@ -957,7 +975,15 @@ fun DashboardScreen(onResetOnboarding: (Int) -> Unit) {
                     onHistoryChanged = { history = HistoryManager.getHistory(context) }
                 )
             } else if (showEditor) {
-                EditorPage(notepad = notepad, onNotepadChange = { notepad = it })
+                EditorPage(
+                    notepad = notepad,
+                    onNotepadChange = { notepad = it },
+                    appState = state,
+                    elapsed = elapsed,
+                    appearance = overlayAppearance,
+                    hasA11y = hasA11y,
+                    onRecord = { handleRecord() }
+                )
             } else if (tab == "playground") {
                 PlaygroundTab(
                     notepad = notepad,
@@ -1407,33 +1433,58 @@ private fun ExpandEditorButton(modifier: Modifier = Modifier, onClick: () -> Uni
 }
 
 @Composable
-private fun EditorPage(notepad: TextFieldValue, onNotepadChange: (TextFieldValue) -> Unit) {
+private fun EditorPage(
+    notepad: TextFieldValue,
+    onNotepadChange: (TextFieldValue) -> Unit,
+    appState: AppState,
+    elapsed: Int,
+    appearance: OverlayAppearance,
+    hasA11y: Boolean,
+    onRecord: () -> Unit
+) {
     val context = LocalContext.current
-    Column(Modifier.fillMaxSize()) {
-        Text("Editor", fontSize = 20.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(4.dp))
-        Text("Focus the page and use the floating Paraflow button to compose.", fontSize = 11.sp,
-            color = TextMuted)
-        Spacer(Modifier.height(12.dp))
-        TextField(
-            value = notepad,
-            onValueChange = onNotepadChange,
-            modifier = Modifier.fillMaxWidth().weight(1f).onFocusChanged {
-                SpeechAccessibilityService.setInAppEditorFocused(context, it.isFocused)
-            },
-            shape = RoundedCornerShape(18.dp),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                focusedContainerColor = BgCard,
-                unfocusedContainerColor = BgCard,
-                cursorColor = Accent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, lineHeight = 24.sp),
-            placeholder = { Text("Start writing…", color = TextMuted) }
-        )
+    var isEditorFocused by remember { mutableStateOf(false) }
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            Text("Editor", fontSize = 20.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(4.dp))
+            Text("Focus the page and use the floating Paraflow button to compose.", fontSize = 11.sp,
+                color = TextMuted)
+            Spacer(Modifier.height(12.dp))
+            TextField(
+                value = notepad,
+                onValueChange = onNotepadChange,
+                modifier = Modifier.fillMaxWidth().weight(1f).onFocusChanged {
+                    isEditorFocused = it.isFocused
+                    SpeechAccessibilityService.setInAppEditorFocused(context, it.isFocused)
+                },
+                shape = RoundedCornerShape(18.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    focusedContainerColor = BgCard,
+                    unfocusedContainerColor = BgCard,
+                    cursorColor = Accent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, lineHeight = 24.sp),
+                placeholder = { Text("Start writing…", color = TextMuted) }
+            )
+        }
+
+        // Accessibility overlays are unavailable when the service is off, but the app's own
+        // editor must still offer exactly the same focus-driven dictation control.
+        if (isEditorFocused && !hasA11y) {
+            Box(Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
+                RecordButton(
+                    appState = appState,
+                    elapsed = elapsed,
+                    appearance = appearance,
+                    onClick = onRecord
+                )
+            }
+        }
     }
 }
 
@@ -2137,11 +2188,9 @@ private fun AppearanceTab(
 ) {
     val context = LocalContext.current
     DisposableEffect(Unit) {
-        context.getSharedPreferences(OverlayAppearanceStore.PREFS, Context.MODE_PRIVATE)
-            .edit().putBoolean(OverlayAppearanceStore.APPEARANCE_TAB_ACTIVE_KEY, true).apply()
+        SpeechAccessibilityService.setAppearancePreviewActive(context, true)
         onDispose {
-            context.getSharedPreferences(OverlayAppearanceStore.PREFS, Context.MODE_PRIVATE)
-                .edit().putBoolean(OverlayAppearanceStore.APPEARANCE_TAB_ACTIVE_KEY, false).apply()
+            SpeechAccessibilityService.setAppearancePreviewActive(context, false)
         }
     }
 

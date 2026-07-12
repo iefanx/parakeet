@@ -238,7 +238,7 @@ class QuickSettingsOverlay(
         addCompactRow(
             parent,
             icon = IconType.SETTINGS,
-            title = "Settings",
+            title = "Open Paraflow",
             value = "",
             showChevron = false,
             onClick = {
@@ -527,14 +527,14 @@ class QuickSettingsOverlay(
     private class QuickSettingsIconView(
         context: Context,
         private val icon: IconType,
-        private val color: Int
+        private val iconColor: Int
     ) : View(context) {
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeWidth = resources.displayMetrics.density * 1.6f
             strokeCap = Paint.Cap.ROUND
             strokeJoin = Paint.Join.ROUND
-            this.color = color
+            color = iconColor
         }
 
         override fun onDraw(canvas: Canvas) {
